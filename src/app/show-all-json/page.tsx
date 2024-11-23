@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from 'next/navigation'; // Import the useRouter hook
 import { useEffect, useState } from "react";
 
 // Define types for the JSON data
@@ -17,6 +18,7 @@ interface IApiResponse {
 export default function ShowAllJson() {
   const [jsonData, setJsonData] = useState<IJsonObject[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();  // Initialize useRouter hook
 
   // Fetch the data from the backend API
   useEffect(() => {
@@ -99,6 +101,14 @@ export default function ShowAllJson() {
           </div>
         ))
       )}
+
+      {/* Floating button for navigating back to the main page */}
+      <button
+        onClick={() => router.push('/')}  // Navigate to the main page
+        className="fixed bottom-10 right-10 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        Back to Main
+      </button>
     </div>
   );
 }

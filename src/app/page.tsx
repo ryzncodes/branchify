@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from 'next/navigation'; // Import the useRouter hook
 import { useState } from "react";
 
 // Define types for the JSON data
@@ -11,9 +12,10 @@ interface IJsonObject {
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export default function Page() {
-  const [jsonString, setJsonString] = useState<string>(""); 
+  const [jsonString, setJsonString] = useState<string>("");
   const [jsonResponse, setJsonResponse] = useState<IJsonObject | null>(null);
   const [error, setError] = useState<string | null>(null);  // State for handling errors
+  const router = useRouter(); // Initialize the useRouter hook
 
   // Handle pasting JSON string
   const handleJsonUpload = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -54,17 +56,17 @@ export default function Page() {
   const handleSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setError(null);  // Clear error before submitting
-  
+
     if (!jsonString.trim()) {
       setError("JSON cannot be empty. Please paste a valid JSON.");
       return;
     }
-  
+
     try {
       // Parse the pasted JSON string into an object
       const parsedJson = JSON.parse(jsonString);
       setJsonResponse(parsedJson);  // Set the parsed JSON
-  
+
       // Send the JSON to the backend and log the response
       const response = await fetch('/api/deserialize', {
         method: 'POST',
@@ -73,9 +75,9 @@ export default function Page() {
         },
         body: JSON.stringify({ jsonString }),
       });
-  
+
       const data = await response.json();
-  
+
       // If there's any error, set it
       if (data.error) {
         setError(data.error);
@@ -88,14 +90,12 @@ export default function Page() {
 
   // Recursive function to render JSON with collapsible sections
   const renderJson = (data: IJson, key?: string) => {
-    // If the data is an object or array, render it recursively
     if (typeof data === "object" && data !== null) {
       if (Array.isArray(data)) {
         return (
           <ul className="pl-6">
             {data.map((item, index) => (
               <li key={index} className="my-1">
-                {/* Render each item in an array with its own collapsible behavior */}
                 {renderJson(item, `${key ? `${key}[${index}]` : index}`)}
               </li>
             ))}
@@ -106,7 +106,6 @@ export default function Page() {
           <div className="pl-6">
             {Object.entries(data).map(([subKey, value]) => (
               <div key={subKey}>
-                {/* For each object property, render with collapsible functionality */}
                 <CollapsibleItem label={subKey}>
                   {renderJson(value, subKey)}
                 </CollapsibleItem>
@@ -116,7 +115,6 @@ export default function Page() {
         );
       }
     } else {
-      // If it's a primitive value, just render it
       return <span className="text-gray-700">{JSON.stringify(data)}</span>;
     }
   };
@@ -187,6 +185,14 @@ export default function Page() {
           <div>{renderJson(jsonResponse)}</div>
         </div>
       )}
+
+      {/* Floating button for navigating to show-all-json page */}
+      <button
+        onClick={() => router.push('/show-all-json')}
+        className="fixed bottom-10 right-10 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        Show All JSON
+      </button>
     </div>
   );
 }
