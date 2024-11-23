@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { insertJson } from '../../../db/database';
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
@@ -16,25 +17,29 @@ export async function POST(request: Request) {
         { status: 413 } // Payload Too Large
       );
     }
+    // Parse the JSON body from the request
+    const { jsonString } = await request.json(); 
 
-    // Parse JSON from the request body
-    const { jsonString } = await request.json();
-
-    // Validate if the jsonString is not empty
+    // Validate the JSON string (ensure it's not empty)
     if (!jsonString || jsonString.trim() === "") {
-      return NextResponse.json(
-        { error: 'JSON string cannot be empty.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'JSON string cannot be empty.' }, { status: 400 });
     }
 
     // Try parsing the JSON string
-    const parsedJson: IJson = JSON.parse(jsonString); 
+    let parsedJson: IJson;
+    try {
+      parsedJson = JSON.parse(jsonString);
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON format' }, { status: 400 });
+    }
 
-    return NextResponse.json(parsedJson); // Return parsed JSON as the response
+    // Insert the valid JSON string into the database
+    insertJson(jsonString);
 
-  } catch {
-    // Return error response for invalid JSON format
-    return NextResponse.json({ error: 'Invalid JSON string' }, { status: 400 });
+    // Return the parsed JSON as the response
+    return NextResponse.json(parsedJson);
+  } catch (error) {
+    console.error("Error processing the JSON", error);
+    return NextResponse.json({ error: 'An error occurred while processing the request.' }, { status: 500 });
   }
 }
