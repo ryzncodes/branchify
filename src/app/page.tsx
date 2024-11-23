@@ -51,19 +51,35 @@ export default function Page() {
   };
 
   // Handle form submission (submit pasted JSON)
-  const handleSubmit = (e: React.FormEvent<HTMLButtonElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setError(null);  // Clear error before submitting
-
+  
     if (!jsonString.trim()) {
       setError("JSON cannot be empty. Please paste a valid JSON.");
       return;
     }
-
+  
     try {
       // Parse the pasted JSON string into an object
       const parsedJson = JSON.parse(jsonString);
-      setJsonResponse(parsedJson);
+      setJsonResponse(parsedJson);  // Set the parsed JSON
+  
+      // Send the JSON to the backend and log the response
+      const response = await fetch('/api/deserialize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jsonString }),
+      });
+  
+      const data = await response.json();
+  
+      // If there's any error, set it
+      if (data.error) {
+        setError(data.error);
+      }
     } catch (error) {
       setError("Invalid JSON format. Please check the syntax.");
       console.error("Invalid JSON format", error);
