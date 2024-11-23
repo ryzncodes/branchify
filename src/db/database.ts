@@ -18,3 +18,9 @@ export function insertJson(jsonString: string) {
   const insert = db.prepare('INSERT INTO json_data (data) VALUES (?)');
   insert.run(jsonString);
 }
+
+// Function to get all JSON data from the database
+export function getAllJson() {
+  const rows = db.prepare('SELECT * FROM json_data').all();
+  return rows;
+}

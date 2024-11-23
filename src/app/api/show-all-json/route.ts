@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import db from '../../../db/database'; // Import the database instance
+import { getAllJson } from '../../../db/database'; // Assuming you have getAllJson function exported from your database file
 
 export async function GET() {
   try {
-    // Fetch all JSON records from the database
-    const rows = db.prepare('SELECT * FROM json_data').all();
+    // Fetch all JSON records from the database using the helper function
+    const rows = getAllJson();  // Get all JSON data from the DB
 
     // Return the fetched rows as a JSON response
     return NextResponse.json({ data: rows });
