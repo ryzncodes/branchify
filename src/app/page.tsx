@@ -15,6 +15,7 @@ export default function Page() {
   const [jsonString, setJsonString] = useState<string>("");
   const [jsonResponse, setJsonResponse] = useState<IJsonObject | null>(null);
   const [error, setError] = useState<string | null>(null);  // State for handling errors
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false); // State to track if form is submitted
   const router = useRouter(); // Initialize the useRouter hook
 
   // Handle pasting JSON string
@@ -53,9 +54,10 @@ export default function Page() {
   };
 
   // Handle form submission (submit pasted JSON)
-  const handleSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLButtonElement> | Event) => {
     e.preventDefault();
     setError(null);  // Clear error before submitting
+    setIsSubmitted(true);  // Mark the form as submitted
 
     if (!jsonString.trim()) {
       setError("JSON cannot be empty. Please paste a valid JSON.");
@@ -178,8 +180,8 @@ export default function Page() {
         />
       </div>
 
-      {/* Render deserialized JSON */}
-      {jsonResponse && (
+      {/* Render deserialized JSON only after form submission */}
+      {isSubmitted && jsonResponse && (
         <div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Deserialized JSON</h2>
           <div>{renderJson(jsonResponse)}</div>
